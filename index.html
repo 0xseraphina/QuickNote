@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickNote</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>QuickNote</h1>
+            <button id="new-note-btn" class="btn primary">+ New Note</button>
+        </header>
+        
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Search notes...">
+        </div>
+        
+        <div class="notes-container">
+            <div class="notes-list" id="notes-list">
+                <!-- Notes will be dynamically added here -->
+            </div>
+            
+            <div class="note-editor" id="note-editor" style="display: none;">
+                <div class="editor-header">
+                    <input type="text" id="note-title" placeholder="Note title...">
+                    <div class="editor-actions">
+                        <button id="save-btn" class="btn primary">Save</button>
+                        <button id="cancel-btn" class="btn secondary">Cancel</button>
+                    </div>
+                </div>
+                <textarea id="note-content" placeholder="Write your note here..."></textarea>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

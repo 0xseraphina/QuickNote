@@ -28,6 +28,21 @@ class QuickNote {
             this.filterNotes(e.target.value);
         });
 
+        document.getElementById('export-json').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.exportNotes('json');
+        });
+
+        document.getElementById('export-txt').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.exportNotes('txt');
+        });
+
+        document.getElementById('import-file').addEventListener('change', (e) => {
+            this.importNotes(e.target.files[0]);
+            e.target.value = '';
+        });
+
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
@@ -194,6 +209,107 @@ class QuickNote {
 
     saveToLocalStorage() {
         localStorage.setItem('quicknotes', JSON.stringify(this.notes));
+    }
+
+    exportNotes(format) {
+        if (this.notes.length === 0) {
+            alert('No notes to export!');
+            return;
+        }
+
+        const timestamp = new Date().toISOString().split('T')[0];
+        let content, filename, mimeType;
+
+        if (format === 'json') {
+            content = JSON.stringify({
+                exportedAt: new Date().toISOString(),
+                notesCount: this.notes.length,
+                notes: this.notes
+            }, null, 2);
+            filename = `quicknotes-${timestamp}.json`;
+            mimeType = 'application/json';
+        } else {
+            content = this.notes.map(note => {
+                const date = new Date(note.updatedAt).toLocaleDateString();
+                return `${note.title || 'Untitled'}\n${'='.repeat((note.title || 'Untitled').length)}\nDate: ${date}\n\n${note.content}\n\n${'─'.repeat(50)}\n\n`;
+            }).join('');
+            filename = `quicknotes-${timestamp}.txt`;
+            mimeType = 'text/plain';
+        }
+
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    importNotes(file) {
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                let importedNotes = [];
+                
+                if (file.type === 'application/json' || file.name.endsWith('.json')) {
+                    const data = JSON.parse(e.target.result);
+                    importedNotes = data.notes || data;
+                } else {
+                    const content = e.target.result;
+                    const sections = content.split('─'.repeat(50));
+                    
+                    importedNotes = sections.map((section, index) => {
+                        const lines = section.trim().split('\n');
+                        if (lines.length < 2) return null;
+                        
+                        const title = lines[0].trim();
+                        const contentStart = lines.findIndex(line => line.startsWith('Date:')) + 2;
+                        const noteContent = lines.slice(contentStart).join('\n').trim();
+                        
+                        return {
+                            id: (Date.now() + index).toString(),
+                            title: title || 'Untitled',
+                            content: noteContent,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        };
+                    }).filter(note => note && (note.title || note.content));
+                }
+
+                if (!Array.isArray(importedNotes) || importedNotes.length === 0) {
+                    alert('No valid notes found in the file!');
+                    return;
+                }
+
+                const validNotes = importedNotes.filter(note => 
+                    note && typeof note === 'object' && (note.title || note.content)
+                );
+
+                if (validNotes.length === 0) {
+                    alert('No valid notes found in the file!');
+                    return;
+                }
+
+                const existingIds = new Set(this.notes.map(note => note.id));
+                const newNotes = validNotes.filter(note => !existingIds.has(note.id));
+                
+                this.notes = [...newNotes, ...this.notes];
+                this.saveToLocalStorage();
+                this.renderNotesList();
+                
+                alert(`Successfully imported ${newNotes.length} notes!`);
+            } catch (error) {
+                alert('Error importing file. Please check the format and try again.');
+                console.error('Import error:', error);
+            }
+        };
+        
+        reader.readAsText(file);
     }
 }
 

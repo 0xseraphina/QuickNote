@@ -10,7 +10,18 @@
     <div class="container">
         <header>
             <h1>QuickNote</h1>
-            <button id="new-note-btn" class="btn primary">+ New Note</button>
+            <div class="header-actions">
+                <div class="dropdown">
+                    <button id="export-btn" class="btn secondary">Export ↓</button>
+                    <div class="dropdown-content">
+                        <a href="#" id="export-json">Export as JSON</a>
+                        <a href="#" id="export-txt">Export as TXT</a>
+                    </div>
+                </div>
+                <label for="import-file" class="btn secondary">Import</label>
+                <input type="file" id="import-file" accept=".json,.txt" style="display: none;">
+                <button id="new-note-btn" class="btn primary">+ New Note</button>
+            </div>
         </header>
         
         <div class="search-bar">

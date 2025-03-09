@@ -2,6 +2,7 @@ class QuickNote {
     constructor() {
         this.notes = JSON.parse(localStorage.getItem('quicknotes')) || [];
         this.currentNoteId = null;
+        this.isDarkMode = localStorage.getItem('darkMode') === 'true';
         this.initializeApp();
     }
 
@@ -9,6 +10,7 @@ class QuickNote {
         this.bindEvents();
         this.renderNotesList();
         this.showEmptyState();
+        this.applyTheme();
     }
 
     bindEvents() {
@@ -41,6 +43,10 @@ class QuickNote {
         document.getElementById('import-file').addEventListener('change', (e) => {
             this.importNotes(e.target.files[0]);
             e.target.value = '';
+        });
+
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            this.toggleTheme();
         });
 
         document.addEventListener('keydown', (e) => {
@@ -310,6 +316,23 @@ class QuickNote {
         };
         
         reader.readAsText(file);
+    }
+
+    toggleTheme() {
+        this.isDarkMode = !this.isDarkMode;
+        this.applyTheme();
+        localStorage.setItem('darkMode', this.isDarkMode);
+    }
+
+    applyTheme() {
+        const themeButton = document.getElementById('theme-toggle');
+        if (this.isDarkMode) {
+            document.body.classList.add('dark-mode');
+            themeButton.textContent = '☀️';
+        } else {
+            document.body.classList.remove('dark-mode');
+            themeButton.textContent = '🌙';
+        }
     }
 }
 

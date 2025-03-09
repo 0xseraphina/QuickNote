@@ -256,6 +256,100 @@ header h1 {
     font-size: 24px;
 }
 
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #1a1a1a;
+    color: #e4e4e4;
+}
+
+body.dark-mode header h1 {
+    color: #f8f9fa;
+}
+
+body.dark-mode .btn.primary {
+    background-color: #3498db;
+}
+
+body.dark-mode .btn.secondary {
+    background-color: #495057;
+    color: #f8f9fa;
+}
+
+body.dark-mode .btn.secondary:hover {
+    background-color: #6c757d;
+}
+
+body.dark-mode .search-bar input {
+    background-color: #2d3748;
+    color: #f8f9fa;
+    border-color: #4a5568;
+}
+
+body.dark-mode .search-bar input:focus {
+    border-color: #3498db;
+}
+
+body.dark-mode .notes-list,
+body.dark-mode .note-editor {
+    background-color: #2d3748;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .note-item {
+    border-bottom-color: #4a5568;
+}
+
+body.dark-mode .note-item:hover {
+    background-color: #374151;
+}
+
+body.dark-mode .note-item.active {
+    background-color: #1e3a8a;
+    border-left-color: #3498db;
+}
+
+body.dark-mode .note-title {
+    color: #f8f9fa;
+}
+
+body.dark-mode .note-preview {
+    color: #9ca3af;
+}
+
+body.dark-mode .note-date {
+    color: #6b7280;
+}
+
+body.dark-mode .editor-header {
+    border-bottom-color: #4a5568;
+}
+
+body.dark-mode .editor-header input {
+    color: #f8f9fa;
+}
+
+body.dark-mode #note-content {
+    color: #f8f9fa;
+    background-color: #2d3748;
+}
+
+body.dark-mode .empty-state {
+    color: #6b7280;
+}
+
+body.dark-mode .dropdown-content {
+    background-color: #2d3748;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .dropdown-content a {
+    color: #f8f9fa;
+}
+
+body.dark-mode .dropdown-content a:hover {
+    background-color: #374151;
+}
+
 @media (max-width: 768px) {
     .notes-container {
         grid-template-columns: 1fr;

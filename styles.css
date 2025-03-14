@@ -127,6 +127,73 @@ header h1 {
     border-color: #3498db;
 }
 
+.filter-tags {
+    margin-top: 15px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    padding: 6px 12px;
+    background-color: #e9ecef;
+    color: #495057;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.tag:hover {
+    background-color: #dee2e6;
+}
+
+.tag.active {
+    background-color: #3498db;
+    color: white;
+}
+
+.tags-input-container {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.tags-input-container input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.tags-input-container input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.current-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.current-tags .tag {
+    position: relative;
+    padding-right: 25px;
+}
+
+.current-tags .tag .remove-tag {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-weight: bold;
+}
+
 .notes-container {
     display: grid;
     grid-template-columns: 350px 1fr;
@@ -182,6 +249,20 @@ header h1 {
     font-size: 12px;
     color: #95a5a6;
     margin-top: 5px;
+}
+
+.note-tags {
+    margin-top: 8px;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.note-tags .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
 }
 
 .note-editor {
@@ -348,6 +429,36 @@ body.dark-mode .dropdown-content a {
 
 body.dark-mode .dropdown-content a:hover {
     background-color: #374151;
+}
+
+body.dark-mode .tag {
+    background-color: #495057;
+    color: #f8f9fa;
+}
+
+body.dark-mode .tag:hover {
+    background-color: #6c757d;
+}
+
+body.dark-mode .tag.active {
+    background-color: #3498db;
+    color: white;
+}
+
+body.dark-mode .tags-input-container input {
+    background-color: #2d3748;
+    color: #f8f9fa;
+    border-color: #4a5568;
+}
+
+body.dark-mode .tags-input-container {
+    border-bottom-color: #4a5568;
+}
+
+body.dark-mode .note-tags .tag {
+    background-color: #4a5568;
+    border-color: #6c757d;
+    color: #f8f9fa;
 }
 
 @media (max-width: 768px) {

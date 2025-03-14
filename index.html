@@ -27,6 +27,9 @@
         
         <div class="search-bar">
             <input type="text" id="search-input" placeholder="Search notes...">
+            <div class="filter-tags" id="filter-tags">
+                <span class="tag all-notes active" data-tag="all">All Notes</span>
+            </div>
         </div>
         
         <div class="notes-container">
@@ -41,6 +44,10 @@
                         <button id="save-btn" class="btn primary">Save</button>
                         <button id="cancel-btn" class="btn secondary">Cancel</button>
                     </div>
+                </div>
+                <div class="tags-input-container">
+                    <input type="text" id="tags-input" placeholder="Tags (comma-separated)">
+                    <div class="current-tags" id="current-tags"></div>
                 </div>
                 <textarea id="note-content" placeholder="Write your note here..."></textarea>
             </div>

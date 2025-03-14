@@ -3,6 +3,7 @@ class QuickNote {
         this.notes = JSON.parse(localStorage.getItem('quicknotes')) || [];
         this.currentNoteId = null;
         this.isDarkMode = localStorage.getItem('darkMode') === 'true';
+        this.currentFilter = 'all';
         this.initializeApp();
     }
 
@@ -11,6 +12,7 @@ class QuickNote {
         this.renderNotesList();
         this.showEmptyState();
         this.applyTheme();
+        this.renderFilterTags();
     }
 
     bindEvents() {
@@ -49,6 +51,16 @@ class QuickNote {
             this.toggleTheme();
         });
 
+        document.getElementById('tags-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.addTagFromInput();
+            }
+        });
+
+        document.getElementById('tags-input').addEventListener('blur', () => {
+            this.addTagFromInput();
+        });
+
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
@@ -64,6 +76,7 @@ class QuickNote {
             id: Date.now().toString(),
             title: '',
             content: '',
+            tags: [],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -72,6 +85,7 @@ class QuickNote {
         this.currentNoteId = newNote.id;
         this.showEditor();
         this.renderNotesList();
+        this.renderCurrentTags();
         
         document.getElementById('note-title').focus();
     }
@@ -92,11 +106,13 @@ class QuickNote {
         if (noteIndex !== -1) {
             this.notes[noteIndex].title = title || 'Untitled';
             this.notes[noteIndex].content = content;
+            this.notes[noteIndex].tags = this.notes[noteIndex].tags || [];
             this.notes[noteIndex].updatedAt = new Date().toISOString();
         }
 
         this.saveToLocalStorage();
         this.renderNotesList();
+        this.renderFilterTags();
         this.hideEditor();
     }
 
@@ -107,7 +123,9 @@ class QuickNote {
         this.currentNoteId = noteId;
         document.getElementById('note-title').value = note.title;
         document.getElementById('note-content').value = note.content;
+        document.getElementById('tags-input').value = '';
         this.showEditor();
+        this.renderCurrentTags();
         this.updateActiveNote(noteId);
     }
 
@@ -124,10 +142,18 @@ class QuickNote {
     }
 
     filterNotes(searchTerm) {
-        const filtered = this.notes.filter(note => 
+        let filtered = this.notes.filter(note => 
             note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            note.content.toLowerCase().includes(searchTerm.toLowerCase())
+            note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (note.tags && note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
         );
+
+        if (this.currentFilter !== 'all') {
+            filtered = filtered.filter(note => 
+                note.tags && note.tags.includes(this.currentFilter)
+            );
+        }
+
         this.renderNotesList(filtered);
     }
 
@@ -142,12 +168,16 @@ class QuickNote {
         const notesHTML = notesToShow.map(note => {
             const date = new Date(note.updatedAt).toLocaleDateString();
             const preview = note.content.substring(0, 100) + (note.content.length > 100 ? '...' : '');
+            const tagsHTML = note.tags && note.tags.length > 0 
+                ? `<div class="note-tags">${note.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>` 
+                : '';
             
             return `
                 <div class="note-item ${note.id === this.currentNoteId ? 'active' : ''}" data-id="${note.id}">
                     <div class="note-title">${note.title || 'Untitled'}</div>
                     <div class="note-preview">${preview}</div>
                     <div class="note-date">${date}</div>
+                    ${tagsHTML}
                 </div>
             `;
         }).join('');
@@ -334,8 +364,104 @@ class QuickNote {
             themeButton.textContent = '🌙';
         }
     }
+
+    addTagFromInput() {
+        const tagsInput = document.getElementById('tags-input');
+        const tagValue = tagsInput.value.trim();
+        
+        if (!tagValue || this.currentNoteId === null) return;
+
+        const note = this.notes.find(n => n.id === this.currentNoteId);
+        if (!note) return;
+
+        if (!note.tags) note.tags = [];
+
+        const newTags = tagValue.split(',').map(tag => tag.trim()).filter(tag => tag && !note.tags.includes(tag));
+        note.tags.push(...newTags);
+
+        tagsInput.value = '';
+        this.renderCurrentTags();
+        this.saveToLocalStorage();
+        this.renderFilterTags();
+    }
+
+    removeTag(tagToRemove) {
+        if (this.currentNoteId === null) return;
+
+        const note = this.notes.find(n => n.id === this.currentNoteId);
+        if (!note || !note.tags) return;
+
+        note.tags = note.tags.filter(tag => tag !== tagToRemove);
+        this.renderCurrentTags();
+        this.saveToLocalStorage();
+        this.renderFilterTags();
+    }
+
+    renderCurrentTags() {
+        const currentTagsContainer = document.getElementById('current-tags');
+        
+        if (this.currentNoteId === null) {
+            currentTagsContainer.innerHTML = '';
+            return;
+        }
+
+        const note = this.notes.find(n => n.id === this.currentNoteId);
+        if (!note || !note.tags || note.tags.length === 0) {
+            currentTagsContainer.innerHTML = '';
+            return;
+        }
+
+        const tagsHTML = note.tags.map(tag => 
+            `<span class="tag">${tag}<span class="remove-tag" onclick="app.removeTag('${tag}')">×</span></span>`
+        ).join('');
+
+        currentTagsContainer.innerHTML = tagsHTML;
+    }
+
+    renderFilterTags() {
+        const filterTagsContainer = document.getElementById('filter-tags');
+        const allTags = [...new Set(this.notes.flatMap(note => note.tags || []))].sort();
+
+        let tagsHTML = `<span class="tag all-notes ${this.currentFilter === 'all' ? 'active' : ''}" data-tag="all">All Notes</span>`;
+        
+        allTags.forEach(tag => {
+            tagsHTML += `<span class="tag ${this.currentFilter === tag ? 'active' : ''}" data-tag="${tag}">${tag}</span>`;
+        });
+
+        filterTagsContainer.innerHTML = tagsHTML;
+        this.bindFilterTagEvents();
+    }
+
+    bindFilterTagEvents() {
+        document.querySelectorAll('.filter-tags .tag').forEach(tagElement => {
+            tagElement.addEventListener('click', () => {
+                const tag = tagElement.dataset.tag;
+                this.setFilter(tag);
+            });
+        });
+    }
+
+    setFilter(tag) {
+        this.currentFilter = tag;
+        this.renderFilterTags();
+        
+        const searchTerm = document.getElementById('search-input').value;
+        if (tag === 'all') {
+            this.renderNotesList();
+        } else {
+            const filtered = this.notes.filter(note => 
+                note.tags && note.tags.includes(tag) &&
+                (searchTerm === '' || 
+                 note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                 note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                 note.tags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase())))
+            );
+            this.renderNotesList(filtered);
+        }
+    }
 }
 
+let app;
 document.addEventListener('DOMContentLoaded', () => {
-    new QuickNote();
+    app = new QuickNote();
 });

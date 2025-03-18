@@ -4,6 +4,7 @@ class QuickNote {
         this.currentNoteId = null;
         this.isDarkMode = localStorage.getItem('darkMode') === 'true';
         this.currentFilter = 'all';
+        this.currentSort = 'updated-desc';
         this.initializeApp();
     }
 
@@ -59,6 +60,11 @@ class QuickNote {
 
         document.getElementById('tags-input').addEventListener('blur', () => {
             this.addTagFromInput();
+        });
+
+        document.getElementById('sort-select').addEventListener('change', (e) => {
+            this.currentSort = e.target.value;
+            this.applyCurrentFilters();
         });
 
         document.addEventListener('keydown', (e) => {
@@ -142,10 +148,16 @@ class QuickNote {
     }
 
     filterNotes(searchTerm) {
+        this.applyCurrentFilters();
+    }
+
+    applyCurrentFilters() {
+        const searchTerm = document.getElementById('search-input').value.toLowerCase();
+        
         let filtered = this.notes.filter(note => 
-            note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (note.tags && note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+            note.title.toLowerCase().includes(searchTerm) ||
+            note.content.toLowerCase().includes(searchTerm) ||
+            (note.tags && note.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
         );
 
         if (this.currentFilter !== 'all') {
@@ -154,10 +166,35 @@ class QuickNote {
             );
         }
 
+        filtered = this.sortNotes(filtered);
         this.renderNotesList(filtered);
     }
 
-    renderNotesList(notesToShow = this.notes) {
+    sortNotes(notes) {
+        const sorted = [...notes];
+        
+        switch (this.currentSort) {
+            case 'updated-desc':
+                return sorted.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+            case 'updated-asc':
+                return sorted.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt));
+            case 'created-desc':
+                return sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            case 'created-asc':
+                return sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            case 'title-asc':
+                return sorted.sort((a, b) => (a.title || 'Untitled').localeCompare(b.title || 'Untitled'));
+            case 'title-desc':
+                return sorted.sort((a, b) => (b.title || 'Untitled').localeCompare(a.title || 'Untitled'));
+            default:
+                return sorted;
+        }
+    }
+
+    renderNotesList(notesToShow) {
+        if (!notesToShow) {
+            notesToShow = this.sortNotes(this.notes);
+        }
         const notesList = document.getElementById('notes-list');
         
         if (notesToShow.length === 0) {
@@ -444,20 +481,7 @@ class QuickNote {
     setFilter(tag) {
         this.currentFilter = tag;
         this.renderFilterTags();
-        
-        const searchTerm = document.getElementById('search-input').value;
-        if (tag === 'all') {
-            this.renderNotesList();
-        } else {
-            const filtered = this.notes.filter(note => 
-                note.tags && note.tags.includes(tag) &&
-                (searchTerm === '' || 
-                 note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                 note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                 note.tags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase())))
-            );
-            this.renderNotesList(filtered);
-        }
+        this.applyCurrentFilters();
     }
 }
 

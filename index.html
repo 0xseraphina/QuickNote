@@ -27,6 +27,16 @@
         
         <div class="search-bar">
             <input type="text" id="search-input" placeholder="Search notes...">
+            <div class="sort-options">
+                <select id="sort-select">
+                    <option value="updated-desc">Recently Updated</option>
+                    <option value="updated-asc">Oldest Updated</option>
+                    <option value="created-desc">Recently Created</option>
+                    <option value="created-asc">Oldest Created</option>
+                    <option value="title-asc">Title A-Z</option>
+                    <option value="title-desc">Title Z-A</option>
+                </select>
+            </div>
             <div class="filter-tags" id="filter-tags">
                 <span class="tag all-notes active" data-tag="all">All Notes</span>
             </div>

@@ -127,6 +127,26 @@ header h1 {
     border-color: #3498db;
 }
 
+.sort-options {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.sort-options select {
+    padding: 8px 12px;
+    border: 2px solid #e1e8ed;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.sort-options select:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
 .filter-tags {
     margin-top: 15px;
     display: flex;
@@ -459,6 +479,12 @@ body.dark-mode .note-tags .tag {
     background-color: #4a5568;
     border-color: #6c757d;
     color: #f8f9fa;
+}
+
+body.dark-mode .sort-options select {
+    background-color: #2d3748;
+    color: #f8f9fa;
+    border-color: #4a5568;
 }
 
 @media (max-width: 768px) {

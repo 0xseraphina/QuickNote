@@ -5,6 +5,8 @@ class QuickNote {
         this.isDarkMode = localStorage.getItem('darkMode') === 'true';
         this.currentFilter = 'all';
         this.currentSort = 'updated-desc';
+        this.autoSaveTimer = null;
+        this.hasUnsavedChanges = false;
         this.initializeApp();
     }
 
@@ -67,6 +69,14 @@ class QuickNote {
             this.applyCurrentFilters();
         });
 
+        document.getElementById('note-title').addEventListener('input', () => {
+            this.onContentChange();
+        });
+
+        document.getElementById('note-content').addEventListener('input', () => {
+            this.onContentChange();
+        });
+
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
@@ -116,9 +126,16 @@ class QuickNote {
             this.notes[noteIndex].updatedAt = new Date().toISOString();
         }
 
-        this.saveToLocalStorage();
-        this.renderNotesList();
-        this.renderFilterTags();
+        this.updateSaveIndicator('saving');
+        
+        setTimeout(() => {
+            this.saveToLocalStorage();
+            this.renderNotesList();
+            this.renderFilterTags();
+            this.hasUnsavedChanges = false;
+            this.updateSaveIndicator('saved');
+        }, 300);
+        
         this.hideEditor();
     }
 
@@ -252,11 +269,14 @@ class QuickNote {
 
     showEditor() {
         document.getElementById('note-editor').style.display = 'flex';
+        this.updateSaveIndicator('saved');
     }
 
     hideEditor() {
         document.getElementById('note-editor').style.display = 'none';
         this.currentNoteId = null;
+        this.hasUnsavedChanges = false;
+        this.clearAutoSave();
         this.updateActiveNote(null);
         
         if (this.notes.length === 0) {
@@ -482,6 +502,79 @@ class QuickNote {
         this.currentFilter = tag;
         this.renderFilterTags();
         this.applyCurrentFilters();
+    }
+
+    onContentChange() {
+        this.hasUnsavedChanges = true;
+        this.updateSaveIndicator('unsaved');
+        this.scheduleAutoSave();
+    }
+
+    scheduleAutoSave() {
+        this.clearAutoSave();
+        
+        this.autoSaveTimer = setTimeout(() => {
+            if (this.hasUnsavedChanges && this.currentNoteId) {
+                this.autoSave();
+            }
+        }, 2000);
+    }
+
+    clearAutoSave() {
+        if (this.autoSaveTimer) {
+            clearTimeout(this.autoSaveTimer);
+            this.autoSaveTimer = null;
+        }
+    }
+
+    autoSave() {
+        if (this.currentNoteId === null || !this.hasUnsavedChanges) return;
+
+        this.updateSaveIndicator('saving');
+
+        const title = document.getElementById('note-title').value.trim();
+        const content = document.getElementById('note-content').value.trim();
+
+        if (!title && !content) {
+            return;
+        }
+
+        const noteIndex = this.notes.findIndex(note => note.id === this.currentNoteId);
+        if (noteIndex !== -1) {
+            this.notes[noteIndex].title = title || 'Untitled';
+            this.notes[noteIndex].content = content;
+            this.notes[noteIndex].tags = this.notes[noteIndex].tags || [];
+            this.notes[noteIndex].updatedAt = new Date().toISOString();
+        }
+
+        setTimeout(() => {
+            this.saveToLocalStorage();
+            this.renderNotesList();
+            this.renderFilterTags();
+            this.hasUnsavedChanges = false;
+            this.updateSaveIndicator('saved');
+        }, 500);
+    }
+
+    updateSaveIndicator(status) {
+        const indicator = document.getElementById('save-indicator');
+        if (!indicator) return;
+
+        indicator.className = `save-indicator ${status}`;
+        
+        switch (status) {
+            case 'saving':
+                indicator.textContent = 'Saving...';
+                break;
+            case 'saved':
+                indicator.textContent = 'Saved';
+                break;
+            case 'unsaved':
+                indicator.textContent = 'Unsaved changes';
+                break;
+            default:
+                indicator.textContent = 'Saved';
+        }
     }
 }
 

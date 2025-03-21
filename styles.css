@@ -320,6 +320,27 @@ header h1 {
 .editor-actions {
     display: flex;
     gap: 10px;
+    align-items: center;
+}
+
+.save-indicator {
+    font-size: 14px;
+    color: #95a5a6;
+    padding: 8px 0;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.save-indicator.saving {
+    color: #f39c12;
+}
+
+.save-indicator.saved {
+    color: #27ae60;
+}
+
+.save-indicator.unsaved {
+    color: #e74c3c;
 }
 
 .editor-actions .btn {
@@ -485,6 +506,22 @@ body.dark-mode .sort-options select {
     background-color: #2d3748;
     color: #f8f9fa;
     border-color: #4a5568;
+}
+
+body.dark-mode .save-indicator {
+    color: #9ca3af;
+}
+
+body.dark-mode .save-indicator.saving {
+    color: #f59e0b;
+}
+
+body.dark-mode .save-indicator.saved {
+    color: #10b981;
+}
+
+body.dark-mode .save-indicator.unsaved {
+    color: #ef4444;
 }
 
 @media (max-width: 768px) {
